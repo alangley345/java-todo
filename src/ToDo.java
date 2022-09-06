@@ -1,4 +1,10 @@
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import java.io.*;
 import java.sql.Connection;
@@ -9,12 +15,13 @@ import java.sql.Statement;
 
 public class ToDo {
 	
-	public static void createNewDB(String fileName) {
-		String currentUser = System.getProperty("user.name");
+	public final static String currentUser = System.getProperty("user.name");
+	public final static String url = "jdbc:sqlite:/home/" + currentUser + "/.local/java-todo/" + currentUser + "_" + "todos.db";
+	
+	public static void createNewDB() {
+		
 		File appDirectory = new File("/home/" + currentUser + "/.local/java-todo");
 		appDirectory.mkdir();
-		
-		String url = "jdbc:sqlite:/home/" + currentUser + "/.local/java-todo/" + currentUser + "_" + fileName;
 		String sqlCreateTable = "CREATE TABLE IF NOT EXISTS items (\n"
 				+ "     id integer PRIMARY KEY,\n"
 				+ "     title text NOT NULL,\n"
@@ -42,7 +49,9 @@ public class ToDo {
 	}
 	
 	public static void main(String[] args) {
-		createNewDB("todos.db");
+		createNewDB();
+		
+		//variables for shell
 		String title        = "My To Dos";
 		int    width        = 400;
 		int    height       = 800;
@@ -51,6 +60,33 @@ public class ToDo {
 		Shell shell     = new Shell(display);
 		shell.setText(title);
 		shell.setSize(width,height);
+		shell.setLayout(new GridLayout()); 
+		
+		final Composite composite = new Composite(shell, SWT.NONE);
+		GridLayout grid = new GridLayout();
+	  	grid.numColumns = 2;
+		composite.setLayout(grid);
+		
+		Button addItemButton = new Button(composite,SWT.PUSH);
+		addItemButton.setText("+");
+		addItemButton.addListener(SWT.Selection, (Listener) new Listener()
+		{
+			public void handleEvent(Event event)
+			{
+				try (Connection conn = DriverManager.getConnection(url)) {
+		            if (conn != null) {
+		            	
+		                System.out.println("Connected!");
+		         
+		            }
+
+		        } 
+				
+				catch (SQLException e) {
+		            System.out.println(e.getMessage());
+		        }
+			}  	    
+		});
 				
 		shell.open();
 		
