@@ -15,10 +15,10 @@ import java.sql.Statement;
 
 public class ToDo {
 	
-	public final static String currentUser = System.getProperty("user.name");
-	public final static String url = "jdbc:sqlite:/home/" + currentUser + "/.local/java-todo/" + currentUser + "_" + "todos.db";
+	public static final String currentUser = System.getProperty("user.name");
+	public static final String url = "jdbc:sqlite:/home/" + currentUser + "/.local/java-todo/" + currentUser + "_" + "todos.db";
 	
-	public static void createNewDB() {
+	private static void createNewDB() {
 		
 		File appDirectory = new File("/home/" + currentUser + "/.local/java-todo");
 		appDirectory.mkdir();
@@ -37,7 +37,6 @@ public class ToDo {
                 Statement createTable = conn.createStatement();
                 createTable.execute(sqlCreateTable);
                 createTable.close();
-                conn.close();
          
             }
 
@@ -69,7 +68,7 @@ public class ToDo {
 		
 		Button addItemButton = new Button(composite,SWT.PUSH);
 		addItemButton.setText("+");
-		addItemButton.addListener(SWT.Selection, (Listener) new Listener()
+		addItemButton.addListener(SWT.Selection, new Listener()
 		{
 			public void handleEvent(Event event)
 			{
