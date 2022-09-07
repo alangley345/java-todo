@@ -10,6 +10,7 @@ import java.io.*;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -66,24 +67,26 @@ public class ToDo {
 	  	grid.numColumns = 2;
 		composite.setLayout(grid);
 		
+		//Add item to table
 		Button addItemButton = new Button(composite,SWT.PUSH);
 		addItemButton.setText("+");
 		addItemButton.addListener(SWT.Selection, new Listener()
 		{
 			public void handleEvent(Event event)
 			{
-				try (Connection conn = DriverManager.getConnection(url)) {
-		            if (conn != null) {
-		            	
-		                System.out.println("Connected!");
-		         
-		            }
+				String title = "Test";
+				String content = "This is a test";
+				String sql = "INSERT INTO items(title,content) VALUES(?,?)";
 
-		        } 
-				
-				catch (SQLException e) {
-		            System.out.println(e.getMessage());
-		        }
+			    try (Connection conn = DriverManager.getConnection(url)){
+			    	PreparedStatement pstmt = conn.prepareStatement(sql);
+			        pstmt.setString(1, title);
+			        pstmt.setString(2, content);
+			        pstmt.executeUpdate();
+			    } 
+			    catch (SQLException e) {
+			        System.out.println(e.getMessage());
+			    }
 			}  	    
 		});
 				
