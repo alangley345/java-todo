@@ -4,6 +4,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.ExpandBar;
+import org.eclipse.swt.widgets.ExpandItem;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import java.io.*;
@@ -56,19 +59,21 @@ public class ToDo {
 		int    width        = 400;
 		int    height       = 800;
 		
+		//shell
 		Display display = new Display();
 		Shell shell     = new Shell(display);
 		shell.setText(title);
 		shell.setSize(width,height);
 		shell.setLayout(new GridLayout()); 
 		
+		//shell layout
 		final Composite composite = new Composite(shell, SWT.NONE);
 		GridLayout grid = new GridLayout();
 	  	grid.numColumns = 2;
 		composite.setLayout(grid);
 		
 		//Add item to table
-		Button addItemButton = new Button(composite,SWT.PUSH);
+		/*Button addItemButton = new Button(composite,SWT.PUSH);
 		addItemButton.setText("+");
 		addItemButton.addListener(SWT.Selection, new Listener()
 		{
@@ -89,6 +94,27 @@ public class ToDo {
 			    }
 			}  	    
 		});
+		*/
+		
+		
+		
+		ExpandBar bar = new ExpandBar (composite, SWT.V_SCROLL);
+		ExpandItem item1 = new ExpandItem (bar, SWT.NONE, 0);
+		
+		//composite for inside the expand bar
+		final Composite barComposite = new Composite(bar, SWT.NONE);
+		GridLayout barGrid = new GridLayout();
+	  	barGrid.numColumns = 1;
+		composite.setLayout(grid);
+		
+		item1.setText("Bar 1");
+	    item1.setExpanded(true);
+		item1.setHeight(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+		item1.setControl(barComposite);
+		
+		Label barLabel = new Label(barComposite,1);
+		barLabel.setText("Test");
+		
 				
 		shell.open();
 		
