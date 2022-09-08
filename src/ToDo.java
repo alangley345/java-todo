@@ -1,21 +1,9 @@
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.ExpandBar;
-import org.eclipse.swt.widgets.ExpandItem;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.*;
+import org.eclipse.swt.layout.*;
+import org.eclipse.swt.widgets.*;
 import java.io.*;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.*;
 
 public class ToDo {
 	
@@ -41,11 +29,8 @@ public class ToDo {
                 Statement createTable = conn.createStatement();
                 createTable.execute(sqlCreateTable);
                 createTable.close();
-         
             }
-
         } 
-		
 		catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -59,27 +44,34 @@ public class ToDo {
 		int    width        = 400;
 		int    height       = 800;
 		
-		//shell
+		//shell & bar
 		Display display = new Display();
 		Shell shell     = new Shell(display);
 		shell.setText(title);
 		shell.setSize(width,height);
 		shell.setLayout(new GridLayout()); 
+		ExpandBar expandBar = new ExpandBar (shell, SWT.NONE);
+		
+		//composite for inside the expand bar
+		final Composite barComposite = new Composite(expandBar, SWT.NONE);
+		GridLayout barLayout             = new GridLayout();
+		barLayout.verticalSpacing    = 10;
+		barComposite.setLayout(barLayout);
 		
 		//shell layout
-		final Composite composite = new Composite(shell, SWT.NONE);
-		GridLayout grid = new GridLayout();
-	  	grid.numColumns = 2;
-		composite.setLayout(grid);
+		//final Composite composite = new Composite(shell, SWT.NONE);
+		//GridLayout grid = new GridLayout();
+	  	//grid.numColumns = 2;
+		//composite.setLayout(grid);
 		
 		//Add item to table
-		/*Button addItemButton = new Button(composite,SWT.PUSH);
+		/*Button addItemButton = new Button(shell,SWT.PUSH);
 		addItemButton.setText("+");
 		addItemButton.addListener(SWT.Selection, new Listener()
 		{
 			public void handleEvent(Event event)
 			{
-				String title = "Test";
+				String title = "Grocery Shopping";
 				String content = "This is a test";
 				String sql = "INSERT INTO items(title,content) VALUES(?,?)";
 
@@ -96,28 +88,43 @@ public class ToDo {
 		});
 		*/
 		
-		
-		
-		ExpandBar bar = new ExpandBar (composite, SWT.V_SCROLL);
-		ExpandItem item1 = new ExpandItem (bar, SWT.NONE, 0);
-		
-		//composite for inside the expand bar
-		final Composite barComposite = new Composite(bar, SWT.NONE);
-		GridLayout barGrid = new GridLayout();
-	  	barGrid.numColumns = 1;
-		composite.setLayout(grid);
-		
-		item1.setText("Bar 1");
-	    item1.setExpanded(true);
-		item1.setHeight(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
-		item1.setControl(barComposite);
-		
-		Label barLabel = new Label(barComposite,1);
-		barLabel.setText("Test");
-		
+		String getAllTasks = "SELECT title, content FROM items;";
+		try (Connection conn = DriverManager.getConnection(url)){
+			Statement selectAllItems = conn.createStatement();
+	    	ResultSet allItems = selectAllItems.executeQuery(getAllTasks);
+	    
+	    	ArrayList<String[]> resultsList = new ArrayList<>();
+	    	
+	    	while(allItems.next()) {
+	    		String resultTitle   = allItems.getString("title");
+	    		String resultContent = allItems.getString("content");
+	    		String[] resultArray = new String[] {resultTitle, resultContent};
+	    		resultsList.add(resultArray);
+	    	}
+	    
+	    	for(int i = 0; i < resultsList.size(); i++) {
+	    		String[] temp = resultsList.get(i);
+	    		Composite itemComposite = new Composite(expandBar, SWT.NONE);
+	    		
+	    		//content
+	    		Text contentText = new Text(itemComposite,SWT.NONE);
+	    		contentText.setText(temp[1]);
+	    		contentText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+	    		contentText.setSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT).y, 50);
+	    		
+	    		//title
+	    		ExpandItem item = new ExpandItem (expandBar, SWT.NONE);
+	    		item.setText(temp[0]);
+	    		item.setExpanded(true);
+	    		item.setHeight(itemComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+	    		item.setControl(itemComposite);	
+	    	}
+	    } 
+	    catch (SQLException e) {
+	        System.out.println(e.getMessage());
+	    }
 				
-		shell.open();
-		
+		shell.open();			
 		while(!shell.isDisposed())
 			if (!display.readAndDispatch())
 				display.sleep();
