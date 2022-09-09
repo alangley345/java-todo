@@ -50,19 +50,15 @@ public class ToDo {
 		shell.setText(title);
 		shell.setSize(width,height);
 		shell.setLayout(new GridLayout()); 
-		ExpandBar expandBar = new ExpandBar (shell, SWT.NONE);
+		ExpandBar expandBar = new ExpandBar (shell, SWT.FILL);
 		
-		//composite for inside the expand bar
-		final Composite barComposite = new Composite(expandBar, SWT.NONE);
-		GridLayout barLayout             = new GridLayout();
-		barLayout.verticalSpacing    = 10;
-		barComposite.setLayout(barLayout);
-		
-		//shell layout
-		//final Composite composite = new Composite(shell, SWT.NONE);
-		//GridLayout grid = new GridLayout();
-	  	//grid.numColumns = 2;
-		//composite.setLayout(grid);
+		//composite for expand bar
+		Composite barComposite    = new Composite(expandBar, SWT.NONE);
+		GridLayout barLayout      = new GridLayout();
+		barLayout.marginLeft      = barLayout.marginTop=
+	    barLayout.marginRight     = barLayout.marginBottom=8;
+	    barLayout.verticalSpacing = 10;
+	    barComposite.setLayout(barLayout);
 		
 		//Add item to table
 		/*Button addItemButton = new Button(shell,SWT.PUSH);
@@ -105,15 +101,21 @@ public class ToDo {
 	    	for(int i = 0; i < resultsList.size(); i++) {
 	    		String[] temp = resultsList.get(i);
 	    		Composite itemComposite = new Composite(expandBar, SWT.NONE);
+	    		GridData itemData =  new GridData(SWT.FILL, SWT.CENTER, true, false);
+	    		itemData.horizontalAlignment = SWT.FILL;
+	    		itemData.grabExcessHorizontalSpace = true;
+	    		itemComposite.setLayoutData(itemData);
 	    		
 	    		//content
-	    		Text contentText = new Text(itemComposite,SWT.NONE);
+	    		Text contentText = new Text(itemComposite,SWT.FILL);
 	    		contentText.setText(temp[1]);
-	    		contentText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-	    		contentText.setSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT).y, 50);
-	    		
+	    		GridData contentData =  new GridData(SWT.FILL, SWT.CENTER, true, false);
+	    		contentData.horizontalAlignment = SWT.FILL;
+	    		contentData.grabExcessHorizontalSpace = true;
+	    		contentText.setLayoutData(contentData);
+
 	    		//title
-	    		ExpandItem item = new ExpandItem (expandBar, SWT.NONE);
+	    		ExpandItem item = new ExpandItem (expandBar, SWT.FILL);
 	    		item.setText(temp[0]);
 	    		item.setExpanded(true);
 	    		item.setHeight(itemComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
