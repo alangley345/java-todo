@@ -143,7 +143,10 @@ public class ToDo {
 				Shell addShell = new Shell(display);
 				addShell.setText("Add New To Do");
 				addShell.setSize(200, 200);
+				addShell.setLocation(shell.getLocation());
+				addShell.open();
 				
+				/*
 				Composite addItemComposite = new Composite(addShell, SWT.NONE);
 				GridLayout addItemGrid = new GridLayout();
 				addItemGrid.numColumns = 1;
@@ -157,9 +160,12 @@ public class ToDo {
 				Text addContentText = new Text(addItemComposite,SWT.CENTER);
 				addContentText.setSize(shell.getSize().x,50);
 				addContentText.setLayoutData(addItemData);
+				*/
 				
+				Button internalAddButton = new Button(addShell,SWT.PUSH);
+				internalAddButton.setText("OK");
 				//addTask();
-				addShell.open();
+				
 			}  	    
 		});				
 		
