@@ -144,6 +144,9 @@ public class ToDo {
 				addShell.setText("Add New To Do");
 				addShell.setSize(200, 200);
 				addShell.setLocation(shell.getLocation());
+				Button internalAddButton = new Button(addShell,SWT.PUSH);
+				internalAddButton.setText("OK");
+				
 				addShell.open();
 				
 				/*
@@ -162,8 +165,7 @@ public class ToDo {
 				addContentText.setLayoutData(addItemData);
 				*/
 				
-				Button internalAddButton = new Button(addShell,SWT.PUSH);
-				internalAddButton.setText("OK");
+				
 				//addTask();
 				
 			}  	    
