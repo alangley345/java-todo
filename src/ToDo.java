@@ -127,7 +127,7 @@ public class ToDo {
 				
 		//shell
 		Display display = new Display();
-		Shell shell     = new Shell(display);
+		Shell shell     = new Shell(display, SWT.CLOSE);
 		shell.setText(title);
 		shell.setSize(width,height);
 		shell.setLayout(new GridLayout()); 
@@ -140,32 +140,23 @@ public class ToDo {
 			public void handleEvent(Event event)
 			{
 				//Display addDisplay = new Display();
-				Shell addShell = new Shell(display);
+				Shell addShell = new Shell(display, SWT.CLOSE);
 				addShell.setText("Add New To Do");
-				addShell.setSize(200, 200);
+				addShell.setSize(400, 400);
 				addShell.setLocation(shell.getLocation());
+	
+				Text addTitleText   = new Text(addShell,SWT.CENTER);
+				addTitleText.setSize(addShell.getSize().x,25);
+				addTitleText.setLocation(addShell.getLocation());
+				
+				Text addContentText = new Text(addShell,SWT.CENTER);
+				addContentText.setSize(addShell.getSize().x,50);
+				
 				Button internalAddButton = new Button(addShell,SWT.PUSH);
-				internalAddButton.setText("OK");
+				internalAddButton.setText("Add Task");
+				internalAddButton.setSize(20, 10);
 				
 				addShell.open();
-				
-				/*
-				Composite addItemComposite = new Composite(addShell, SWT.NONE);
-				GridLayout addItemGrid = new GridLayout();
-				addItemGrid.numColumns = 1;
-				addItemComposite.setLayout(addItemGrid); 
-				
-				GridData addItemData =  new GridData(SWT.FILL, SWT.CENTER, true, false);
-				Text addTitleText   = new Text(addItemComposite,SWT.CENTER);
-				addTitleText.setSize(shell.getSize().x,25);
-				addTitleText.setLayoutData(addItemData);
-				
-				Text addContentText = new Text(addItemComposite,SWT.CENTER);
-				addContentText.setSize(shell.getSize().x,50);
-				addContentText.setLayoutData(addItemData);
-				*/
-				
-				
 				//addTask();
 				
 			}  	    
