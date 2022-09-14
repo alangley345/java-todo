@@ -36,11 +36,10 @@ public class ToDo {
         }
 	}
 	
-	private static void addTask(Text labelText, Text contentText) {
-		String title   = labelText.getText();
-		String content = contentText.getText();
-		String sql = "INSERT INTO items(title,content) VALUES(?,?)";
-
+	private static void addTask(String title, String content) {
+		//String title   = textTitle;
+		//String content = textContent;
+		String sql     = "INSERT INTO items(title,content) VALUES(?,?)";
 	    try (Connection conn = DriverManager.getConnection(url)){
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, title);
@@ -75,7 +74,7 @@ public class ToDo {
 		
 	}
 	
-	private static void drawTasks(ArrayList<String[]> resultsList, Shell shell, ExpandBar expandBar) {
+	private static void drawTasks(ArrayList<String[]> resultsList, Shell shell, ExpandBar expandBar, Display display) {
 		for(int i = 0; i < resultsList.size(); i++) {
 			String[] temp = resultsList.get(i);
 			Composite itemComposite = new Composite(expandBar, SWT.NONE);
@@ -97,13 +96,12 @@ public class ToDo {
 			item.setHeight(100);
 			item.setControl(itemComposite);	
 			    		
-			Button itemButton = new Button(itemComposite,SWT.PUSH);
-			itemButton.setText("Delete");
-			itemButton.addListener(SWT.Selection, new Listener()
+			Button deleteButton = new Button(itemComposite,SWT.PUSH);
+			deleteButton.setText("Delete");
+			deleteButton.addListener(SWT.Selection, new Listener()
 			{
 				public void handleEvent(Event event){
 					String searchString = contentText.getText();
-			    	System.out.println(searchString);
 			    	String sql = "DELETE FROM items WHERE content=?";
 			    	try (Connection conn = DriverManager.getConnection(url)){
 			    		PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -113,7 +111,6 @@ public class ToDo {
 			    	catch (SQLException e) {
 	    			    System.out.println(e.getMessage());
 	    			}
-	    			expandBar.update();
 			    } 	    
 			});
 		}
@@ -130,7 +127,8 @@ public class ToDo {
 		Shell shell     = new Shell(display, SWT.CLOSE);
 		shell.setText(title);
 		shell.setSize(width,height);
-		shell.setLayout(new GridLayout()); 
+		shell.setLayout(new GridLayout());
+		shell.layout(true);
 		
 		//Add item to table using text fields in new shell
 		Button addItemButton = new Button(shell,SWT.PUSH);
@@ -144,38 +142,50 @@ public class ToDo {
 				addShell.setText("Add New To Do");
 				addShell.setSize(400, 400);
 				addShell.setLocation(shell.getLocation());
+				addShell.setLayout(new GridLayout());
+				
 	
-				Text addTitleText   = new Text(addShell,SWT.CENTER);
+				Text addTitleText   = new Text(addShell,SWT.FILL);
 				addTitleText.setSize(addShell.getSize().x,25);
 				addTitleText.setLocation(addShell.getLocation());
 				
-				Text addContentText = new Text(addShell,SWT.CENTER);
-				addContentText.setSize(addShell.getSize().x,50);
+				Text addContentText = new Text(addShell,SWT.FILL);
+				addContentText.setSize(100,addShell.getSize().x);
+				addContentText.setLocation(addShell.getLocation().x, addShell.getLocation().y-75);
 				
 				Button internalAddButton = new Button(addShell,SWT.PUSH);
 				internalAddButton.setText("Add Task");
 				internalAddButton.setSize(20, 10);
+				internalAddButton.setLocation(addShell.getLocation().x, addShell.getLocation().y-350);
+				internalAddButton.addListener(SWT.Selection, new Listener()
+				{
+					public void handleEvent(Event event)
+					{	
+						addTask(addTitleText.getText(), addContentText.getText());
+						addShell.close();					
+					}  	    
+				});
 				
 				addShell.open();
-				//addTask();
+		
 				
 			}  	    
 		});				
 		
 		//composite for expand bar
-		Composite barComposite = new Composite(shell, SWT.FILL);
+		Composite barComposite          = new Composite(shell, SWT.FILL);
 		GridData barCompositeGridData   = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
 		barCompositeGridData.widthHint  = (shell.getSize().x);
 		barComposite.setLayoutData(barCompositeGridData);
 		
 		//expandbar for tasks
-		ExpandBar expandBar    = new ExpandBar(shell, SWT.FILL);
+		ExpandBar expandBar          = new ExpandBar(shell, SWT.FILL);
 		GridData expandBarGridData   = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
 		expandBarGridData.widthHint  = (shell.getSize().x);
 		expandBar.setLayoutData(expandBarGridData);
 		
 		ArrayList<String[]> results = getTasks();
-		drawTasks(results, shell, expandBar);
+		drawTasks(results, shell, expandBar, display);
 		
 	    shell.open();			
 		while(!shell.isDisposed())
