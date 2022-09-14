@@ -36,21 +36,6 @@ public class ToDo {
         }
 	}
 	
-	private static void addTask(String title, String content) {
-		//String title   = textTitle;
-		//String content = textContent;
-		String sql     = "INSERT INTO items(title,content) VALUES(?,?)";
-	    try (Connection conn = DriverManager.getConnection(url)){
-			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, title);
-			pstmt.setString(2, content);
-			pstmt.executeUpdate();
-		} 
-		catch (SQLException e) {
-			System.out.println(e.getMessage());
-		}
-	}
-	
 	private static ArrayList<String[]> getTasks() {
 		String getAllTasks = "SELECT title, content FROM items;";
 		ArrayList<String[]> resultsList = new ArrayList<>();
@@ -161,14 +146,21 @@ public class ToDo {
 				{
 					public void handleEvent(Event event)
 					{	
-						addTask(addTitleText.getText(), addContentText.getText());
+						String sql     = "INSERT INTO items(title,content) VALUES(?,?)";
+					    try (Connection conn = DriverManager.getConnection(url)){
+							PreparedStatement pstmt = conn.prepareStatement(sql);
+							pstmt.setString(1, addTitleText.getText());
+							pstmt.setString(2, addContentText.getText());
+							pstmt.executeUpdate();
+						} 
+						catch (SQLException e) {
+							System.out.println(e.getMessage());
+						}
 						addShell.close();					
 					}  	    
 				});
 				
-				addShell.open();
-		
-				
+				addShell.open();	
 			}  	    
 		});				
 		
