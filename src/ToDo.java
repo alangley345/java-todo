@@ -9,6 +9,7 @@ public class ToDo {
 	
 	public static final String currentUser = System.getProperty("user.name");
 	public static final String url = "jdbc:sqlite:/home/" + currentUser + "/.local/share/java-todo/" + currentUser + "_" + "todos.db";
+	public static int numTasks;
 	
 	private static void createNewDB() {
 		//check for individuals tables and create it if it doesn't exist
@@ -40,7 +41,7 @@ public class ToDo {
 		String getAllTasks = "SELECT title, content FROM items;";
 		ArrayList<String[]> resultsList = new ArrayList<>();
 		
-		try (Connection conn = DriverManager.getConnection(url)){
+		try(Connection conn = DriverManager.getConnection(url)){
 			Statement selectAllItems = conn.createStatement();
 			ResultSet allItems = selectAllItems.executeQuery(getAllTasks);
 			    	
@@ -59,7 +60,13 @@ public class ToDo {
 		
 	}
 	
-	private static void drawTasks(ArrayList<String[]> resultsList, Shell shell, ExpandBar expandBar, Display display) {
+	private static void drawTasks(Shell shell, ArrayList<String[]> resultsList) {
+		//expandbar for tasks
+	    ExpandBar expandBar          = new ExpandBar(shell, SWT.FILL);
+	    GridData expandBarGridData   = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
+	    expandBarGridData.widthHint  = (shell.getSize().x);
+	    expandBar.setLayoutData(expandBarGridData);
+	   
 		for(int i = 0; i < resultsList.size(); i++) {
 			String[] temp = resultsList.get(i);
 			Composite itemComposite = new Composite(expandBar, SWT.NONE);
@@ -88,12 +95,12 @@ public class ToDo {
 				public void handleEvent(Event event){
 					String searchString = contentText.getText();
 			    	String sql = "DELETE FROM items WHERE content=?";
-			    	try (Connection conn = DriverManager.getConnection(url)){
+			    	try(Connection conn = DriverManager.getConnection(url)){
 			    		PreparedStatement pstmt = conn.prepareStatement(sql);
 			    		pstmt.setString(1, searchString);
 			    		pstmt.executeUpdate();
 			    	}
-			    	catch (SQLException e) {
+			    	catch(SQLException e) {
 	    			    System.out.println(e.getMessage());
 	    			}
 			    } 	    
@@ -101,19 +108,7 @@ public class ToDo {
 		}
 	}
 	
-	private static void drawApp() {
-		//variables for shell
-		String title        = "My To Dos";
-		int    width        = 400;
-		int    height       = 600;
-				
-		//shell
-		Display display = new Display();
-		Shell shell     = new Shell(display, SWT.CLOSE);
-		shell.setText(title);
-		shell.setSize(width,height);
-		shell.setLayout(new GridLayout());
-		shell.layout(true);
+	private static void drawAddButton(Shell shell, Display display) {
 		
 		//Add item to table using text fields in new shell
 		Button addItemButton = new Button(shell,SWT.PUSH);
@@ -129,7 +124,6 @@ public class ToDo {
 				addShell.setLocation(shell.getLocation());
 				addShell.setLayout(new GridLayout());
 				
-	
 				Text addTitleText   = new Text(addShell,SWT.FILL);
 				addTitleText.setSize(addShell.getSize().x,25);
 				addTitleText.setLocation(addShell.getLocation());
@@ -162,32 +156,46 @@ public class ToDo {
 				
 				addShell.open();	
 			}  	    
-		});				
+		});
+	}
+	
+	public static void drawGUI() {
+		//variables for shell
+		String title        = "My To Dos";
+		int    width        = 400;
+		int    height       = 600;
+								
+		//shell & display
+		Display display = new Display();
+		Shell shell     = new Shell(display, SWT.CLOSE);
+		display.timerExec(1000, new Runnable() {
+			public void run() {
+				ArrayList<String[]> resultsList = getTasks();
+				drawTasks(shell, resultsList);
+				System.out.println("testing this timer");
+				display.timerExec(1000, this);
+	        }
+	    });
 		
-		//composite for expand bar
-		Composite barComposite          = new Composite(shell, SWT.FILL);
-		GridData barCompositeGridData   = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
-		barCompositeGridData.widthHint  = (shell.getSize().x);
-		barComposite.setLayoutData(barCompositeGridData);
+		shell.setText(title);
+		shell.setSize(width,height);
+		shell.setLayout(new GridLayout());
 		
-		//expandbar for tasks
-		ExpandBar expandBar          = new ExpandBar(shell, SWT.FILL);
-		GridData expandBarGridData   = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
-		expandBarGridData.widthHint  = (shell.getSize().x);
-		expandBar.setLayoutData(expandBarGridData);
+		drawAddButton(shell, display);
 		
-		ArrayList<String[]> results = getTasks();
-		drawTasks(results, shell, expandBar, display);
+		shell.open();
 		
-	    shell.open();			
-		while(!shell.isDisposed())
-			if (!display.readAndDispatch())
+		while(!shell.isDisposed()) {
+			if (!display.readAndDispatch()) {
 				display.sleep();
+			}
+		}
+		
 		display.dispose();
 	}
 	
 	public static void main(String[] args) {
 		createNewDB();
-		drawApp();
+		drawGUI();
 	}
 }
