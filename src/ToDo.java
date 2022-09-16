@@ -9,7 +9,8 @@ public class ToDo {
 	
 	public static final String currentUser = System.getProperty("user.name");
 	public static final String url = "jdbc:sqlite:/home/" + currentUser + "/.local/share/java-todo/" + currentUser + "_" + "todos.db";
-	public static int numTasks;
+	
+	//public static ArrayList<String[]> resultsList = new ArrayList<>();
 	
 	private static void createNewDB() {
 		//check for individuals tables and create it if it doesn't exist
@@ -57,7 +58,6 @@ public class ToDo {
 		}
 		
 		return resultsList;
-		
 	}
 	
 	private static void drawTasks(Shell shell, ArrayList<String[]> resultsList) {
@@ -168,18 +168,20 @@ public class ToDo {
 		//shell & display
 		Display display = new Display();
 		Shell shell     = new Shell(display, SWT.CLOSE);
-		display.timerExec(1000, new Runnable() {
+
+		Display.getDefault().timerExec(1000, new Runnable() {
 			public void run() {
 				ArrayList<String[]> resultsList = getTasks();
 				drawTasks(shell, resultsList);
-				System.out.println("testing this timer");
-				display.timerExec(1000, this);
+				 
+				Display.getDefault().timerExec(1000, this);
 	        }
 	    });
 		
 		shell.setText(title);
 		shell.setSize(width,height);
 		shell.setLayout(new GridLayout());
+		shell.layout(true);
 		
 		drawAddButton(shell, display);
 		
