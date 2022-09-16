@@ -168,20 +168,22 @@ public class ToDo {
 		//shell & display
 		Display display = new Display();
 		Shell shell     = new Shell(display, SWT.CLOSE);
-		display.timerExec(1000, new Runnable() {
-			public void run() {
-				ArrayList<String[]> resultsList = getTasks();
-				drawTasks(shell, resultsList);
-				System.out.println("testing this timer");
-				display.timerExec(1000, this);
-	        }
-	    });
 		
 		shell.setText(title);
 		shell.setSize(width,height);
 		shell.setLayout(new GridLayout());
+		shell.layout(true);
 		
 		drawAddButton(shell, display);
+		
+		Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+				ArrayList<String[]> resultsList = getTasks();
+				drawTasks(shell, resultsList);
+				System.out.println("testing this timer");
+				//display.asyncExec(this);
+	        }
+	    });
 		
 		shell.open();
 		
