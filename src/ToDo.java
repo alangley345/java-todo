@@ -10,7 +10,7 @@ public class ToDo {
 	public static final String currentUser = System.getProperty("user.name");
 	public static final String url = "jdbc:sqlite:/home/" + currentUser + "/.local/share/java-todo/" + currentUser + "_" + "todos.db";
 	
-	//public static ArrayList<String[]> resultsList = new ArrayList<>();
+	public static ArrayList<String[]> resultsList = new ArrayList<>();
 	
 	private static void createNewDB() {
 		//check for individuals tables and create it if it doesn't exist
@@ -167,20 +167,7 @@ public class ToDo {
 								
 		//shell & display
 		Display display = new Display();
-		Shell shell     = new Shell(display, SWT.CLOSE);
-<<<<<<< HEAD
-
-		Display.getDefault().timerExec(1000, new Runnable() {
-			public void run() {
-				ArrayList<String[]> resultsList = getTasks();
-				drawTasks(shell, resultsList);
-				 
-				Display.getDefault().timerExec(1000, this);
-	        }
-	    });
-=======
->>>>>>> 0f6eb155de6bbb039302ff8156a316011be75b8e
-		
+		Shell shell     = new Shell(display, SWT.CLOSE);		
 		shell.setText(title);
 		shell.setSize(width,height);
 		shell.setLayout(new GridLayout());
@@ -188,14 +175,15 @@ public class ToDo {
 		
 		drawAddButton(shell, display);
 		
-		Display.getDefault().asyncExec(new Runnable() {
+		Display.getDefault().asyncExec(new Query() {
 			public void run() {
-				ArrayList<String[]> resultsList = getTasks();
-				drawTasks(shell, resultsList);
-				System.out.println("testing this timer");
-				//display.asyncExec(this);
+				getTasks();
+				display.asyncExec(this);
 	        }
 	    });
+		
+		//ArrayList<String[]> resultsList = getTasks();
+		drawTasks(shell, resultsList);
 		
 		shell.open();
 		
