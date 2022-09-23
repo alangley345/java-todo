@@ -1,6 +1,8 @@
 import org.eclipse.swt.*;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.List;
+
 import java.io.*;
 import java.sql.*;
 import java.util.*;
@@ -16,8 +18,7 @@ public class ToDo {
 		appDirectory.mkdir();
 		String sqlCreateTable = "CREATE TABLE IF NOT EXISTS items (\n"
 				+ "     id integer PRIMARY KEY,\n"
-				+ "     title text NOT NULL,\n"
-				+ "     content text NOT NULL\n"
+				+ "     task text NOT NULL\n"
 				+ ");";
 				
 		try (Connection conn = DriverManager.getConnection(url)) {
@@ -37,7 +38,7 @@ public class ToDo {
 	}
 	
 	private static ArrayList<String[]> getTasks() {
-		String getAllTasks = "SELECT title, content FROM items;";
+		String getAllTasks = "SELECT task FROM items;";
 		ArrayList<String[]> resultsList = new ArrayList<>();
 		
 		try(Connection conn = DriverManager.getConnection(url)){
@@ -45,9 +46,8 @@ public class ToDo {
 			ResultSet allItems = selectAllItems.executeQuery(getAllTasks);
 			    	
 			while(allItems.next()) {
-				String resultTitle   = allItems.getString("title");
-				String resultContent = allItems.getString("content");
-				String[] resultArray = new String[] {resultTitle, resultContent};
+				String resultTasks   = allItems.getString("task");
+				String[] resultArray = new String[] {resultTasks};
 				resultsList.add(resultArray);
 			}
 		}
@@ -58,65 +58,19 @@ public class ToDo {
 		return resultsList;
 	}
 	
-	private static void drawTasks(Shell shell) {
+	private static void drawTasks(Shell shell, List list) {
 		ArrayList<String[]> resultsList = getTasks();
-		
-		//expandbar for tasks
-	    ExpandBar expandBar          = new ExpandBar(shell, SWT.FILL);
-	    GridData expandBarGridData   = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
-	    expandBarGridData.widthHint  = (shell.getSize().x);
-	    expandBar.setLayoutData(expandBarGridData);
-	    expandBar.layout(true, true);
-	   
 		for(int i = 0; i < resultsList.size(); i++) {
 			String[] temp = resultsList.get(i);
-			Composite itemComposite = new Composite(expandBar, SWT.NONE);
-			GridLayout itemGrid = new GridLayout();
-			itemGrid.numColumns = 1;
-			itemComposite.setLayout(itemGrid);
-			    		
-			//content
-			Label contentText = new Label(itemComposite,SWT.CENTER);
-			contentText.setText(temp[1]);
-			GridData contentData =  new GridData(SWT.FILL, SWT.CENTER, true, false);
-			contentText.setLayoutData(contentData);
-			contentText.setSize(shell.getSize().x,50);
-			    		
-			//title
-			ExpandItem item = new ExpandItem (expandBar, SWT.FILL);
-			item.setText(temp[0]);
-			item.setExpanded(true);
-			item.setHeight(100);
-			item.setControl(itemComposite);	
-			    		
-			Button deleteButton = new Button(itemComposite,SWT.PUSH);
-			deleteButton.setText("Delete");
-			deleteButton.addListener(SWT.Selection, new Listener()
-			{
-				public void handleEvent(Event event){
-					String searchString = contentText.getText();
-			    	String sql = "DELETE FROM items WHERE content=?";
-			    	try(Connection conn = DriverManager.getConnection(url)){
-			    		PreparedStatement pstmt = conn.prepareStatement(sql);
-			    		pstmt.setString(1, searchString);
-			    		pstmt.executeUpdate();
-			    	}
-			    	catch(SQLException e) {
-	    			    System.out.println(e.getMessage());
-	    			}
-			    	drawTasks(shell);
-			 	 
-			    } 	    
-			});
+			list.add(temp[0]);
 		}
 	}
 	
-	private static void drawAddButton(Shell shell, Display display) {
-		
+	private static void drawAddButton(Shell shell, Display display, List list) {
 		//Add item to table using text fields in new shell
 		Button addItemButton = new Button(shell,SWT.PUSH);
 		addItemButton.setText("+");
-		addItemButton.setSize(100, 25);
+		addItemButton.setSize(shell.getSize().x, 50);
 		addItemButton.addListener(SWT.Selection, new Listener()
 		{
 			public void handleEvent(Event event)
@@ -127,15 +81,15 @@ public class ToDo {
 				addShell.setSize(400, 400);
 				addShell.setLocation(shell.getLocation());
 				addShell.setLayout(new GridLayout());
+				GridData addShellGrid = new GridData(SWT.FILL, SWT.CENTER, true, false);
 				
-				Text addTitleText   = new Text(addShell,SWT.FILL);
-				addTitleText.setSize(addShell.getSize().x,25);
-				addTitleText.setLocation(addShell.getLocation());
-				
+				//Text for addition
 				Text addContentText = new Text(addShell,SWT.FILL);
-				addContentText.setSize(100,addShell.getSize().x);
+				addContentText.setSize(400,100);
 				addContentText.setLocation(addShell.getLocation().x, addShell.getLocation().y-75);
+				addContentText.setLayoutData(addShellGrid);
 				
+				//SQL insert statement
 				Button internalAddButton = new Button(addShell,SWT.PUSH);
 				internalAddButton.setText("Add Task");
 				internalAddButton.setSize(20, 10);
@@ -144,24 +98,50 @@ public class ToDo {
 				{
 					public void handleEvent(Event event)
 					{	
-						String sql = "INSERT INTO items(title,content) VALUES(?,?)";
+						String sql = "INSERT INTO items(task) VALUES(?)";
 					    try (Connection conn = DriverManager.getConnection(url)){
 							PreparedStatement pstmt = conn.prepareStatement(sql);
-							pstmt.setString(1, addTitleText.getText());
-							pstmt.setString(2, addContentText.getText());
+							pstmt.setString(1, addContentText.getText());
 							pstmt.executeUpdate();
 						} 
 						catch (SQLException e) {
 							System.out.println(e.getMessage());
 						}
 						addShell.close();
-						drawTasks(shell);
-						shell.update();
+						list.removeAll();
+						drawTasks(shell, list);
 					}  	    
 				});
 				
 				addShell.open();	
 			}  	    
+		});
+	}
+	
+	private static void drawDeleteButton(Shell shell, Display display, List list) {	
+		Button deleteButton = new Button(shell,SWT.PUSH);
+		deleteButton.setText("-");
+		deleteButton.setSize(shell.getSize().x, 50);
+		deleteButton.addListener(SWT.Selection, new Listener()
+		{
+			public void handleEvent(Event event){
+				String[] searchStrings = list.getSelection();
+				
+				for(int i = 0; i < searchStrings.length; i++) {
+					String tempString = searchStrings[i];
+					String sql = "DELETE FROM items WHERE task=?";
+					try(Connection conn = DriverManager.getConnection(url)){
+						PreparedStatement pstmt = conn.prepareStatement(sql);
+						pstmt.setString(1, tempString);
+						pstmt.executeUpdate();
+					}
+					catch(SQLException e) {
+						System.out.println(e.getMessage());
+					}
+				}
+				list.removeAll();
+				drawTasks(shell, list);
+			} 	    
 		});
 	}
 	
@@ -178,31 +158,30 @@ public class ToDo {
 		shell.setSize(width,height);
 		shell.setLayout(new GridLayout());
 		
-		GridData shellGridData       = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		GridData shellGridData       = new GridData(SWT.FILL, SWT.FILL, true, false);
 		shellGridData.horizontalAlignment = GridData.FILL;
 		shellGridData.grabExcessVerticalSpace = true;
-		shellGridData.widthHint = 200;
+		shellGridData.widthHint = shell.getSize().x;
 		shell.setLayoutData(shellGridData);
 		shell.layout(true,true);
-				
 		
-		drawAddButton(shell, display);
+		// Create a List
+	    List list = new List(shell, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
+	    list.setLayoutData(shellGridData);
 		
-		display.asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				drawTasks(shell);
-			}
-		});
+	    //Add action buttons
+		drawAddButton(shell, display, list);
+		drawDeleteButton(shell, display, list);
+		
+		//Populate the tasks
+		drawTasks(shell, list);
 		
 		shell.open();
-		
 		while(!shell.isDisposed()) {
 			if (!display.readAndDispatch()) {
 				display.sleep();
 			}
 		}
-		
 		display.dispose();
 	}
 	
