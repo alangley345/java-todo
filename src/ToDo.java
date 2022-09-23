@@ -10,8 +10,6 @@ public class ToDo {
 	public static final String currentUser = System.getProperty("user.name");
 	public static final String url = "jdbc:sqlite:/home/" + currentUser + "/.local/share/java-todo/" + currentUser + "_" + "todos.db";
 	
-	//public static ArrayList<String[]> resultsList = new ArrayList<>();
-	
 	private static void createNewDB() {
 		//check for individuals tables and create it if it doesn't exist
 		File appDirectory = new File("/home/" + currentUser + "/.local/share/java-todo");
@@ -60,12 +58,15 @@ public class ToDo {
 		return resultsList;
 	}
 	
-	private static void drawTasks(Shell shell, ArrayList<String[]> resultsList) {
+	private static void drawTasks(Shell shell) {
+		ArrayList<String[]> resultsList = getTasks();
+		
 		//expandbar for tasks
 	    ExpandBar expandBar          = new ExpandBar(shell, SWT.FILL);
 	    GridData expandBarGridData   = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
 	    expandBarGridData.widthHint  = (shell.getSize().x);
 	    expandBar.setLayoutData(expandBarGridData);
+	    expandBar.layout(true, true);
 	   
 		for(int i = 0; i < resultsList.size(); i++) {
 			String[] temp = resultsList.get(i);
@@ -75,7 +76,7 @@ public class ToDo {
 			itemComposite.setLayout(itemGrid);
 			    		
 			//content
-			Text contentText = new Text(itemComposite,SWT.CENTER);
+			Label contentText = new Label(itemComposite,SWT.CENTER);
 			contentText.setText(temp[1]);
 			GridData contentData =  new GridData(SWT.FILL, SWT.CENTER, true, false);
 			contentText.setLayoutData(contentData);
@@ -103,6 +104,8 @@ public class ToDo {
 			    	catch(SQLException e) {
 	    			    System.out.println(e.getMessage());
 	    			}
+			    	drawTasks(shell);
+			 	 
 			    } 	    
 			});
 		}
@@ -113,6 +116,7 @@ public class ToDo {
 		//Add item to table using text fields in new shell
 		Button addItemButton = new Button(shell,SWT.PUSH);
 		addItemButton.setText("+");
+		addItemButton.setSize(100, 25);
 		addItemButton.addListener(SWT.Selection, new Listener()
 		{
 			public void handleEvent(Event event)
@@ -140,7 +144,7 @@ public class ToDo {
 				{
 					public void handleEvent(Event event)
 					{	
-						String sql     = "INSERT INTO items(title,content) VALUES(?,?)";
+						String sql = "INSERT INTO items(title,content) VALUES(?,?)";
 					    try (Connection conn = DriverManager.getConnection(url)){
 							PreparedStatement pstmt = conn.prepareStatement(sql);
 							pstmt.setString(1, addTitleText.getText());
@@ -150,7 +154,9 @@ public class ToDo {
 						catch (SQLException e) {
 							System.out.println(e.getMessage());
 						}
-						addShell.close();					
+						addShell.close();
+						drawTasks(shell);
+						shell.update();
 					}  	    
 				});
 				
@@ -167,23 +173,32 @@ public class ToDo {
 								
 		//shell & display
 		Display display = new Display();
+<<<<<<< HEAD
 		Shell shell     = new Shell(display, SWT.CLOSE);
 		
+=======
+		Shell shell     = new Shell(display, SWT.CLOSE);		
+>>>>>>> 5c3604aa8d6ef1fdd070c6deffea676c298d0112
 		shell.setText(title);
 		shell.setSize(width,height);
 		shell.setLayout(new GridLayout());
-		shell.layout(true);
+		
+		GridData shellGridData       = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		shellGridData.horizontalAlignment = GridData.FILL;
+		shellGridData.grabExcessVerticalSpace = true;
+		shellGridData.widthHint = 200;
+		shell.setLayoutData(shellGridData);
+		shell.layout(true,true);
+				
 		
 		drawAddButton(shell, display);
 		
-		Display.getDefault().asyncExec(new Runnable() {
+		display.asyncExec(new Runnable() {
+			@Override
 			public void run() {
-				ArrayList<String[]> resultsList = getTasks();
-				drawTasks(shell, resultsList);
-				System.out.println("testing this timer");
-				//display.asyncExec(this);
-	        }
-	    });
+				drawTasks(shell);
+			}
+		});
 		
 		shell.open();
 		
