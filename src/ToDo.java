@@ -173,12 +173,7 @@ public class ToDo {
 								
 		//shell & display
 		Display display = new Display();
-<<<<<<< HEAD
 		Shell shell     = new Shell(display, SWT.CLOSE);
-		
-=======
-		Shell shell     = new Shell(display, SWT.CLOSE);		
->>>>>>> 5c3604aa8d6ef1fdd070c6deffea676c298d0112
 		shell.setText(title);
 		shell.setSize(width,height);
 		shell.setLayout(new GridLayout());
