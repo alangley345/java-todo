@@ -163,23 +163,11 @@ public class ToDo {
 		//variables for shell
 		String title        = "My To Dos";
 		int    width        = 400;
-		int    height       = 600;
+		int    height       = 800;
 								
 		//shell & display
 		Display display = new Display();
 		Shell shell     = new Shell(display, SWT.CLOSE);
-<<<<<<< HEAD
-
-		Display.getDefault().timerExec(1000, new Runnable() {
-			public void run() {
-				ArrayList<String[]> resultsList = getTasks();
-				drawTasks(shell, resultsList);
-				 
-				Display.getDefault().timerExec(1000, this);
-	        }
-	    });
-=======
->>>>>>> 0f6eb155de6bbb039302ff8156a316011be75b8e
 		
 		shell.setText(title);
 		shell.setSize(width,height);
