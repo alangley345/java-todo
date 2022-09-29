@@ -26,7 +26,7 @@ public class ToDo {
             if (conn != null) {
                 DatabaseMetaData meta = conn.getMetaData();
                 System.out.println("The driver name is " + meta.getDriverName());
-                System.out.println("A new database has been created.");
+                System.out.println("Connection to DB.");
                 
                 Statement createTable = conn.createStatement();
                 createTable.execute(sqlCreateTable);
@@ -76,7 +76,7 @@ public class ToDo {
 		{
 			public void handleEvent(Event event)
 			{
-				//Display addDisplay = new Display();
+				//new shell for add functionality
 				Shell addShell = new Shell(display, SWT.CLOSE);
 				addShell.setText("Add New To Do");
 				addShell.setSize(400, 400);
@@ -119,6 +119,25 @@ public class ToDo {
 		});
 	}
 	
+	private static void deleteItems(Shell shell, List list){
+		
+		String[] searchStrings = list.getSelection();
+		for(int i = 0; i < searchStrings.length; i++) {
+			String tempString = searchStrings[i];
+			String sql = "DELETE FROM items WHERE task=?";
+			try(Connection conn = DriverManager.getConnection(url)){
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, tempString);
+				pstmt.executeUpdate();
+			}
+			catch(SQLException e) {
+				System.out.println(e.getMessage());
+			}
+		}
+		list.removeAll();
+		drawTasks(shell, list);
+	}
+	
 	private static void drawDeleteButton(Shell shell, Display display, List list) {	
 		Button deleteButton = new Button(shell,SWT.PUSH);
 		deleteButton.setText("DELETE");
@@ -126,22 +145,15 @@ public class ToDo {
 		deleteButton.addListener(SWT.Selection, new Listener()
 		{
 			public void handleEvent(Event event){
-				String[] searchStrings = list.getSelection();
-				
-				for(int i = 0; i < searchStrings.length; i++) {
-					String tempString = searchStrings[i];
-					String sql = "DELETE FROM items WHERE task=?";
-					try(Connection conn = DriverManager.getConnection(url)){
-						PreparedStatement pstmt = conn.prepareStatement(sql);
-						pstmt.setString(1, tempString);
-						pstmt.executeUpdate();
-					}
-					catch(SQLException e) {
-						System.out.println(e.getMessage());
-					}
-				}
-				list.removeAll();
-				drawTasks(shell, list);
+				MessageBox messageBox = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
+		        messageBox.setText("Delete");
+		        messageBox.setMessage("Are you sure you want to delete this task?");
+		        int buttonID = messageBox.open();
+		        switch(buttonID) {
+		          case SWT.OK: deleteItems(shell, list);
+		          case SWT.CANCEL:
+		            break;
+		        }
 			} 	    
 		});
 	}
@@ -226,12 +238,12 @@ public class ToDo {
 	    List list = new List(shell, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
 	    list.setLayoutData(shellGridData);
 		
-	    //Add buttons,
+	    //Add buttons for functions
 		drawAddButton(shell, display, list);
 		drawDeleteButton(shell, display, list);
 		editItemButton(shell, display, list);
 		
-		//Populate the tasks
+		//Populate the tasks in the list
 		drawTasks(shell, list);
 		
 		shell.open();
