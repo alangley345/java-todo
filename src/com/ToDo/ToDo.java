@@ -1,3 +1,4 @@
+package com.ToDo;
 import org.eclipse.swt.*;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
@@ -25,7 +26,7 @@ public class ToDo {
             if (conn != null) {
                 DatabaseMetaData meta = conn.getMetaData();
                 System.out.println("The driver name is " + meta.getDriverName());
-                System.out.println("A new database has been created.");
+                System.out.println("Connection to DB.");
                 
                 Statement createTable = conn.createStatement();
                 createTable.execute(sqlCreateTable);
@@ -69,13 +70,13 @@ public class ToDo {
 	private static void drawAddButton(Shell shell, Display display, List list) {
 		//Add item to table using text fields in new shell
 		Button addItemButton = new Button(shell,SWT.PUSH);
-		addItemButton.setText("+");
+		addItemButton.setText("ADD");
 		addItemButton.setSize(shell.getSize().x, 50);
 		addItemButton.addListener(SWT.Selection, new Listener()
 		{
 			public void handleEvent(Event event)
 			{
-				//Display addDisplay = new Display();
+				//new shell for add functionality
 				Shell addShell = new Shell(display, SWT.CLOSE);
 				addShell.setText("Add New To Do");
 				addShell.setSize(400, 400);
@@ -118,15 +119,55 @@ public class ToDo {
 		});
 	}
 	
+	private static void deleteItems(Shell shell, List list){
+		
+		String[] searchStrings = list.getSelection();
+		for(int i = 0; i < searchStrings.length; i++) {
+			String tempString = searchStrings[i];
+			String sql = "DELETE FROM items WHERE task=?";
+			try(Connection conn = DriverManager.getConnection(url)){
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, tempString);
+				pstmt.executeUpdate();
+			}
+			catch(SQLException e) {
+				System.out.println(e.getMessage());
+			}
+		}
+		list.removeAll();
+		drawTasks(shell, list);
+	}
+	
 	private static void drawDeleteButton(Shell shell, Display display, List list) {	
 		Button deleteButton = new Button(shell,SWT.PUSH);
-		deleteButton.setText("-");
+		deleteButton.setText("DELETE");
 		deleteButton.setSize(shell.getSize().x, 50);
 		deleteButton.addListener(SWT.Selection, new Listener()
 		{
 			public void handleEvent(Event event){
-				String[] searchStrings = list.getSelection();
+				MessageBox messageBox = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
+		        messageBox.setText("Delete");
+		        messageBox.setMessage("Are you sure you want to delete this task?");
+		        int buttonID = messageBox.open();
+		        switch(buttonID) {
+		          case SWT.OK: deleteItems(shell, list);
+		          case SWT.CANCEL:
+		            break;
+		        }
+			} 	    
+		});
+	}
+	
+	private static void editItemButton(Shell shell, Display display, List list) {	
+		Button editButton = new Button(shell,SWT.PUSH);
+		editButton.setText("EDIT");
+		editButton.setSize(shell.getSize().x, 50);
+		editButton.addListener(SWT.Selection, new Listener()
+		{
+			public void handleEvent(Event event){
+				String[] taskToEdit = list.getSelection();
 				
+<<<<<<< HEAD:src/ToDo.java
 				for(int i = 0; i < searchStrings.length; i++) {
 					String tempString   = searchStrings[i];
 					String sql          = "DELETE FROM items WHERE task=?";
@@ -138,9 +179,51 @@ public class ToDo {
 					catch(SQLException e) {
 						System.out.println(e.getMessage());
 					}
+=======
+				if(taskToEdit.length == 1){
+					//new shell for editing
+					Shell editShell = new Shell(display, SWT.CLOSE);
+					editShell.setText("Add New To Do");
+					editShell.setSize(400, 400);
+					editShell.setLocation(shell.getLocation());
+					editShell.setLayout(new GridLayout());
+					GridData editShellGrid = new GridData(SWT.FILL, SWT.CENTER, true, false);
+					
+					//Text for addition
+					Text editContentText = new Text(editShell,SWT.FILL);
+					editContentText.setSize(400,100);
+					editContentText.setLocation(editShell.getLocation().x, editShell.getLocation().y-75);
+					editContentText.setLayoutData(editShellGrid);
+					editContentText.setText(taskToEdit[0]);
+				
+					//SQL update statement
+					Button internalAddButton = new Button(editShell,SWT.PUSH);
+					internalAddButton.setText("Edit Task");
+					internalAddButton.setSize(20, 10);
+					internalAddButton.setLocation(editShell.getLocation().x, editShell.getLocation().y-350);
+					internalAddButton.addListener(SWT.Selection, new Listener()
+					{
+						public void handleEvent(Event event)
+						{	
+							String sql = "UPDATE items SET task=? WHERE task=?";
+							try(Connection conn = DriverManager.getConnection(url)){
+								PreparedStatement pstmt = conn.prepareStatement(sql);
+								pstmt.setString(1, editContentText.getText());
+								pstmt.setString(2, taskToEdit[0]);
+								pstmt.executeUpdate();
+							}
+							catch(SQLException e) {
+								System.out.println(e.getMessage());
+							}
+							editShell.close();
+							list.removeAll();
+							drawTasks(shell, list);
+						}	    
+					});
+					editShell.open();
+>>>>>>> 1455d175ba408e2fb849e4eeaab60d7a9564334f:src/com/ToDo/ToDo.java
 				}
-				list.removeAll();
-				drawTasks(shell, list);
+				
 			} 	    
 		});
 	}
@@ -169,11 +252,12 @@ public class ToDo {
 	    List list = new List(shell, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
 	    list.setLayoutData(shellGridData);
 		
-	    //Add action buttons
+	    //Add buttons for functions
 		drawAddButton(shell, display, list);
 		drawDeleteButton(shell, display, list);
+		editItemButton(shell, display, list);
 		
-		//Populate the tasks
+		//Populate the tasks in the list
 		drawTasks(shell, list);
 		
 		shell.open();
