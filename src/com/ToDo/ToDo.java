@@ -167,10 +167,8 @@ public class ToDo {
 			public void handleEvent(Event event){
 				String[] taskToEdit = list.getSelection();
 				
-<<<<<<< HEAD
-<<<<<<< HEAD:src/ToDo.java
-				for(int i = 0; i < searchStrings.length; i++) {
-					String tempString   = searchStrings[i];
+				for(int i = 0; i < taskToEdit.length; i++) {
+					String tempString   = taskToEdit[i];
 					String sql          = "DELETE FROM items WHERE task=?";
 					try(Connection conn = DriverManager.getConnection(url)){
 						PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -180,9 +178,6 @@ public class ToDo {
 					catch(SQLException e) {
 						System.out.println(e.getMessage());
 					}
-=======
-=======
->>>>>>> 1455d175ba408e2fb849e4eeaab60d7a9564334f
 				if(taskToEdit.length == 1){
 					//new shell for editing
 					Shell editShell = new Shell(display, SWT.CLOSE);
@@ -224,14 +219,10 @@ public class ToDo {
 						}	    
 					});
 					editShell.open();
-<<<<<<< HEAD
->>>>>>> 1455d175ba408e2fb849e4eeaab60d7a9564334f:src/com/ToDo/ToDo.java
-=======
->>>>>>> 1455d175ba408e2fb849e4eeaab60d7a9564334f
 				}
 				
 			} 	    
-		});
+		}});
 	}
 	
 	public static void drawGUI() {
