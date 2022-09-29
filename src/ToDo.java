@@ -43,7 +43,7 @@ public class ToDo {
 		
 		try(Connection conn = DriverManager.getConnection(url)){
 			Statement selectAllItems = conn.createStatement();
-			ResultSet allItems = selectAllItems.executeQuery(getAllTasks);
+			ResultSet allItems       = selectAllItems.executeQuery(getAllTasks);
 			    	
 			while(allItems.next()) {
 				String resultTasks   = allItems.getString("task");
@@ -128,8 +128,8 @@ public class ToDo {
 				String[] searchStrings = list.getSelection();
 				
 				for(int i = 0; i < searchStrings.length; i++) {
-					String tempString = searchStrings[i];
-					String sql = "DELETE FROM items WHERE task=?";
+					String tempString   = searchStrings[i];
+					String sql          = "DELETE FROM items WHERE task=?";
 					try(Connection conn = DriverManager.getConnection(url)){
 						PreparedStatement pstmt = conn.prepareStatement(sql);
 						pstmt.setString(1, tempString);
@@ -152,16 +152,16 @@ public class ToDo {
 		int    height       = 800;
 								
 		//shell & display
-		Display display = new Display();
-		Shell shell     = new Shell(display, SWT.CLOSE);
+		Display display     = new Display();
+		Shell shell         = new Shell(display, SWT.CLOSE);
 		shell.setText(title);
 		shell.setSize(width,height);
 		shell.setLayout(new GridLayout());
 		
-		GridData shellGridData       = new GridData(SWT.FILL, SWT.FILL, true, false);
-		shellGridData.horizontalAlignment = GridData.FILL;
+		GridData shellGridData                = new GridData(SWT.FILL, SWT.FILL, true, false);
+		shellGridData.horizontalAlignment     = GridData.FILL;
 		shellGridData.grabExcessVerticalSpace = true;
-		shellGridData.widthHint = shell.getSize().x;
+		shellGridData.widthHint               = shell.getSize().x;
 		shell.setLayoutData(shellGridData);
 		shell.layout(true,true);
 		
