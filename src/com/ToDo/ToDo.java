@@ -67,9 +67,9 @@ public class ToDo {
 		}
 	}
 	
-	private static void drawAddButton(Shell shell, Display display, List list) {
+	private static void drawAddButton(Composite composite, Shell shell, Display display, List list) {
 		//Add item to table using text fields in new shell
-		Button addItemButton = new Button(shell,SWT.PUSH);
+		Button addItemButton = new Button(composite,SWT.PUSH);
 		addItemButton.setText("ADD");
 		addItemButton.setSize(shell.getSize().x, 50);
 		addItemButton.addListener(SWT.Selection, new Listener()
@@ -138,10 +138,10 @@ public class ToDo {
 		drawTasks(shell, list);
 	}
 	
-	private static void drawDeleteButton(Shell shell, Display display, List list) {	
-		Button deleteButton = new Button(shell,SWT.PUSH);
+	private static void drawDeleteButton(Composite composite, Shell shell, Display display, List list) {	
+		Button deleteButton = new Button(composite,SWT.PUSH);
 		deleteButton.setText("DELETE");
-		deleteButton.setSize(shell.getSize().x, 50);
+		deleteButton.setSize(composite.getSize().x, 50);
 		deleteButton.addListener(SWT.Selection, new Listener()
 		{
 			public void handleEvent(Event event){
@@ -158,26 +158,15 @@ public class ToDo {
 		});
 	}
 	
-	private static void editItemButton(Shell shell, Display display, List list) {	
-		Button editButton = new Button(shell,SWT.PUSH);
+	private static void drawEditButton(Composite composite, Shell shell, Display display, List list) {	
+		Button editButton = new Button(composite,SWT.PUSH);
 		editButton.setText("EDIT");
-		editButton.setSize(shell.getSize().x, 50);
+		editButton.setSize(composite.getSize().x, 50);
 		editButton.addListener(SWT.Selection, new Listener()
 		{
 			public void handleEvent(Event event){
 				String[] taskToEdit = list.getSelection();
 				
-				for(int i = 0; i < taskToEdit.length; i++) {
-					String tempString   = taskToEdit[i];
-					String sql          = "DELETE FROM items WHERE task=?";
-					try(Connection conn = DriverManager.getConnection(url)){
-						PreparedStatement pstmt = conn.prepareStatement(sql);
-						pstmt.setString(1, tempString);
-						pstmt.executeUpdate();
-					}
-					catch(SQLException e) {
-						System.out.println(e.getMessage());
-					}
 				if(taskToEdit.length == 1){
 					//new shell for editing
 					Shell editShell = new Shell(display, SWT.CLOSE);
@@ -196,7 +185,7 @@ public class ToDo {
 				
 					//SQL update statement
 					Button internalAddButton = new Button(editShell,SWT.PUSH);
-					internalAddButton.setText("Edit Task");
+					internalAddButton.setText("Update Task");
 					internalAddButton.setSize(20, 10);
 					internalAddButton.setLocation(editShell.getLocation().x, editShell.getLocation().y-350);
 					internalAddButton.addListener(SWT.Selection, new Listener()
@@ -222,12 +211,12 @@ public class ToDo {
 				}
 				
 			} 	    
-		}});
+		});
 	}
 	
 	public static void drawGUI() {
 		//variables for shell
-		String title        = "My To Dos";
+		String title        = currentUser + "'s " + "To Dos";
 		int    width        = 400;
 		int    height       = 800;
 								
@@ -249,10 +238,13 @@ public class ToDo {
 	    List list = new List(shell, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
 	    list.setLayoutData(shellGridData);
 		
+	    Composite buttonComposite = new Composite(shell, 1);
+	    buttonComposite.setLayout(new RowLayout());
+	    
 	    //Add buttons for functions
-		drawAddButton(shell, display, list);
-		drawDeleteButton(shell, display, list);
-		editItemButton(shell, display, list);
+		drawAddButton(buttonComposite, shell, display, list);
+		drawDeleteButton(buttonComposite, shell, display, list);
+		drawEditButton(buttonComposite, shell, display, list);
 		
 		//Populate the tasks in the list
 		drawTasks(shell, list);
