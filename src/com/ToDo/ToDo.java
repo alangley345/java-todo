@@ -90,7 +90,7 @@ public class ToDo {
 				addContentText.setLocation(addShell.getLocation().x, addShell.getLocation().y-75);
 				addContentText.setLayoutData(addShellGrid);
 				
-				//SQL insert statement
+				//Finalize adding task to SQL
 				Button internalAddButton = new Button(addShell,SWT.PUSH);
 				internalAddButton.setText("Add Task");
 				internalAddButton.setSize(20, 10);
@@ -238,13 +238,14 @@ public class ToDo {
 	    List list = new List(shell, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
 	    list.setLayoutData(shellGridData);
 		
+	    //row for the buttons
 	    Composite buttonComposite = new Composite(shell, 1);
 	    buttonComposite.setLayout(new RowLayout());
 	    
 	    //Add buttons for functions
 		drawAddButton(buttonComposite, shell, display, list);
-		drawDeleteButton(buttonComposite, shell, display, list);
 		drawEditButton(buttonComposite, shell, display, list);
+		drawDeleteButton(buttonComposite, shell, display, list);
 		
 		//Populate the tasks in the list
 		drawTasks(shell, list);
