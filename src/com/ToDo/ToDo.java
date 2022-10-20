@@ -234,6 +234,18 @@ public class ToDo {
 		shell.setLayoutData(shellGridData);
 		shell.layout(true,true);
 		
+		
+		//row for the menu
+	    Composite menuComposite = new Composite(shell, 1);
+	    menuComposite.setLayout(new RowLayout());
+	    
+		Menu menuBar = new Menu(shell, SWT.BAR);
+		MenuItem fileMenu = new MenuItem(menuBar, SWT.CASCADE);
+		fileMenu.setText("File");
+		MenuItem helpMenu = new MenuItem(menuBar, SWT.CASCADE);
+		helpMenu.setText("Help");
+		
+		
 		// Create a List
 	    List list = new List(shell, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
 	    list.setLayoutData(shellGridData);
