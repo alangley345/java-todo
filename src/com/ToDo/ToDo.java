@@ -1,9 +1,10 @@
 package com.ToDo;
+import org.apache.pdfbox.pdmodel.*;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.eclipse.swt.*;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.widgets.List;
-
 import java.io.*;
 import java.sql.*;
 import java.util.*;
@@ -119,25 +120,6 @@ public class ToDo {
 		});
 	}
 	
-	private static void deleteItems(Shell shell, List list){
-		
-		String[] searchStrings = list.getSelection();
-		for(int i = 0; i < searchStrings.length; i++) {
-			String tempString = searchStrings[i];
-			String sql = "DELETE FROM items WHERE task=?";
-			try(Connection conn = DriverManager.getConnection(url)){
-				PreparedStatement pstmt = conn.prepareStatement(sql);
-				pstmt.setString(1, tempString);
-				pstmt.executeUpdate();
-			}
-			catch(SQLException e) {
-				System.out.println(e.getMessage());
-			}
-		}
-		list.removeAll();
-		drawTasks(shell, list);
-	}
-	
 	private static void drawDeleteButton(Composite composite, Shell shell, Display display, List list) {	
 		Button deleteButton = new Button(composite,SWT.PUSH);
 		deleteButton.setText("DELETE");
@@ -213,7 +195,60 @@ public class ToDo {
 			} 	    
 		});
 	}
+
+	private static void deleteItems(Shell shell, List list){
+		
+		String[] searchStrings = list.getSelection();
+		for(int i = 0; i < searchStrings.length; i++) {
+			String tempString = searchStrings[i];
+			String sql = "DELETE FROM items WHERE task=?";
+			try(Connection conn = DriverManager.getConnection(url)){
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, tempString);
+				pstmt.executeUpdate();
+			}
+			catch(SQLException e) {
+				System.out.println(e.getMessage());
+			}
+		}
+		list.removeAll();
+		drawTasks(shell, list);
+	}
 	
+	private static void savePDF() {
+		ArrayList<String[]> resultsList = getTasks();
+		PDDocument document = new PDDocument();
+		int offset = 700;
+		
+		try {
+			PDPage newPage = new PDPage();
+			document.addPage(newPage);
+			PDPage tasks = document.getPage(0);
+			PDPageContentStream contentStream = new PDPageContentStream(document, tasks);
+			contentStream.setFont(PDType1Font.COURIER, 16);
+			contentStream.beginText();
+			contentStream.newLineAtOffset(25, offset);
+			
+			for(int i = 0; i < resultsList.size(); i++) {
+				String[] temp = resultsList.get(i);
+				contentStream.showText(temp[0]);
+				contentStream.newLine();
+				offset += 100;
+			}
+			
+			contentStream.endText();
+			contentStream.close();
+			document.save("/home/aaron/Downloads/pdf_test.pdf");
+			document.close();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		
+		
+	}
+
 	public static void drawGUI() {
 		//variables for shell
 		String title        = currentUser + "'s " + "To Dos";
@@ -234,17 +269,28 @@ public class ToDo {
 		shell.setLayoutData(shellGridData);
 		shell.layout(true,true);
 		
-		
-		//row for the menu
-	    Composite menuComposite = new Composite(shell, 1);
-	    menuComposite.setLayout(new RowLayout());
-	    
+	    //menus
 		Menu menuBar = new Menu(shell, SWT.BAR);
+		
+		//file
 		MenuItem fileMenu = new MenuItem(menuBar, SWT.CASCADE);
 		fileMenu.setText("File");
+		Menu fileSubMenu = new Menu(shell, SWT.DROP_DOWN);
+	    fileMenu.setMenu(fileSubMenu);
+	    
+	    MenuItem exportAsPDF = new MenuItem(fileSubMenu, SWT.PUSH);
+	    exportAsPDF.setText("Save as PDF");
+	    exportAsPDF.addListener(SWT.Selection, new Listener() {
+	    	 public void handleEvent(Event event) {
+	    		 savePDF();
+	    	 }
+	    });
+		
+	    //help
 		MenuItem helpMenu = new MenuItem(menuBar, SWT.CASCADE);
 		helpMenu.setText("Help");
 		
+		shell.setMenuBar(menuBar);
 		
 		// Create a List
 	    List list = new List(shell, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
