@@ -256,7 +256,7 @@ public class ToDo {
 		}
 	}
 
-	public static void drawGUI() {
+	private static void drawGUI() {
 		//variables for shell
 		String title        = currentUser + "'s " + "To Dos";
 		int    width        = 400;
