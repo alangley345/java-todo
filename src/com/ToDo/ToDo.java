@@ -12,7 +12,9 @@ import java.util.*;
 public class ToDo {
 	
 	public static final String currentUser = System.getProperty("user.name");
-	public static final String url = "jdbc:sqlite:/home/" + currentUser + "/.local/share/java-todo/" + currentUser + "_" + "todos.db";
+	public static final String url         = "jdbc:sqlite:/home/" + currentUser +
+			                                 "/.local/share/java-todo/" + currentUser + "_" + "todos.db";
+	public static final Display display    = new Display();
 	
 	private static void createNewDB() {
 		//check for individuals tables and create it if it doesn't exist
@@ -215,6 +217,16 @@ public class ToDo {
 		drawTasks(shell, list);
 	}
 	
+	private static String chooseSaveLocation() {
+		Shell saveShell = new Shell(display);
+		FileDialog fileSave = new FileDialog(saveShell, SWT.SAVE);
+		fileSave.open();
+		String name = fileSave.getFilterPath() + "/" + fileSave.getFileName();
+		System.out.println(name);
+		return name;
+
+	}
+	
 	private static void savePDF() {
 		ArrayList<String[]> resultsList = getTasks();
 		int offset = 700;
@@ -247,7 +259,8 @@ public class ToDo {
 			
 			contentStream.endText();
 			contentStream.close();
-			document.save("/home/aaron/Downloads/pdf_test.pdf");
+			String fileName = chooseSaveLocation();
+			document.save(fileName);
 			document.close();
 		}
 		catch (IOException e1) {
@@ -255,15 +268,14 @@ public class ToDo {
 			e1.printStackTrace();
 		}
 	}
-
+	
 	private static void drawGUI() {
 		//variables for shell
 		String title        = currentUser + "'s " + "To Dos";
 		int    width        = 400;
 		int    height       = 800;
 								
-		//shell & display
-		Display display     = new Display();
+		//shell
 		Shell shell         = new Shell(display, SWT.CLOSE);
 		shell.setText(title);
 		shell.setSize(width,height);
