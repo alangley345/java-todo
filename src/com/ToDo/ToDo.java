@@ -11,59 +11,11 @@ import java.util.*;
 
 public class ToDo {
 	
+	
+	public static final Display display    = new Display();		
 	public static final String currentUser = System.getProperty("user.name");
-	public static final String url         = "jdbc:sqlite:/home/" + currentUser +
-			                                 "/.local/share/java-todo/" + currentUser + "_" + "todos.db";
-	public static final Display display    = new Display();
-	
-	private static void createNewDB() {
-		//check for individuals tables and create it if it doesn't exist
-		File appDirectory = new File("/home/" + currentUser + "/.local/share/java-todo");
-		appDirectory.mkdir();
-		String sqlCreateTable = "CREATE TABLE IF NOT EXISTS items (\n"
-				+ "     id integer PRIMARY KEY,\n"
-				+ "     task text NOT NULL\n"
-				+ ");";
-				
-		try (Connection conn = DriverManager.getConnection(url)) {
-            if (conn != null) {
-                DatabaseMetaData meta = conn.getMetaData();
-                System.out.println("The driver name is " + meta.getDriverName());
-                System.out.println("Connection to DB.");
-                
-                Statement createTable = conn.createStatement();
-                createTable.execute(sqlCreateTable);
-                createTable.close();
-            }
-        } 
-		catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-	}
-	
-	private static ArrayList<String[]> getTasks() {
-		String getAllTasks = "SELECT task FROM items;";
-		ArrayList<String[]> resultsList = new ArrayList<>();
-		
-		try(Connection conn = DriverManager.getConnection(url)){
-			Statement selectAllItems = conn.createStatement();
-			ResultSet allItems       = selectAllItems.executeQuery(getAllTasks);
-			    	
-			while(allItems.next()) {
-				String resultTasks   = allItems.getString("task");
-				String[] resultArray = new String[] {resultTasks};
-				resultsList.add(resultArray);
-			}
-		}
-		catch(SQLException e) {
-			System.out.println(e.getMessage());
-		}
-		
-		return resultsList;
-	}
-	
 	private static void drawTasks(Shell shell, List list) {
-		ArrayList<String[]> resultsList = getTasks();
+		ArrayList<String[]> resultsList = Database.getTasks();
 		for(int i = 0; i < resultsList.size(); i++) {
 			String[] temp = resultsList.get(i);
 			list.add(temp[0]);
@@ -102,15 +54,7 @@ public class ToDo {
 				{
 					public void handleEvent(Event event)
 					{	
-						String sql = "INSERT INTO items(task) VALUES(?)";
-					    try (Connection conn = DriverManager.getConnection(url)){
-							PreparedStatement pstmt = conn.prepareStatement(sql);
-							pstmt.setString(1, addContentText.getText());
-							pstmt.executeUpdate();
-						} 
-						catch (SQLException e) {
-							System.out.println(e.getMessage());
-						}
+						Database.insertTask(addContentText.getText());
 						addShell.close();
 						list.removeAll();
 						drawTasks(shell, list);
@@ -176,16 +120,7 @@ public class ToDo {
 					{
 						public void handleEvent(Event event)
 						{	
-							String sql = "UPDATE items SET task=? WHERE task=?";
-							try(Connection conn = DriverManager.getConnection(url)){
-								PreparedStatement pstmt = conn.prepareStatement(sql);
-								pstmt.setString(1, editContentText.getText());
-								pstmt.setString(2, taskToEdit[0]);
-								pstmt.executeUpdate();
-							}
-							catch(SQLException e) {
-								System.out.println(e.getMessage());
-							}
+							Database.updateTask(editContentText.getText(), taskToEdit[0]);
 							editShell.close();
 							list.removeAll();
 							drawTasks(shell, list);
@@ -203,15 +138,7 @@ public class ToDo {
 		String[] searchStrings = list.getSelection();
 		for(int i = 0; i < searchStrings.length; i++) {
 			String tempString = searchStrings[i];
-			String sql = "DELETE FROM items WHERE task=?";
-			try(Connection conn = DriverManager.getConnection(url)){
-				PreparedStatement pstmt = conn.prepareStatement(sql);
-				pstmt.setString(1, tempString);
-				pstmt.executeUpdate();
-			}
-			catch(SQLException e) {
-				System.out.println(e.getMessage());
-			}
+			Database.deleteItem(tempString);
 		}
 		list.removeAll();
 		drawTasks(shell, list);
@@ -228,7 +155,7 @@ public class ToDo {
 	}
 	
 	private static void savePDF() {
-		ArrayList<String[]> resultsList = getTasks();
+		ArrayList<String[]> resultsList = Database.getTasks();
 		int offset = 700;
 		
 		try {
@@ -337,7 +264,7 @@ public class ToDo {
 	}
 	
 	public static void main(String[] args) {
-		createNewDB();
+		new Database();
 		drawGUI();
 	}
 }
