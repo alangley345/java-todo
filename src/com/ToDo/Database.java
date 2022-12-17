@@ -2,7 +2,6 @@ package com.ToDo;
 
 import java.io.File;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -33,38 +32,35 @@ public class Database {
 		appDirectory.mkdir();
 		createTable(sqlCreateUserTable);
 		createTable(sqlCreateTaskTable);
-		
 	}
-	
 	
 	private static void createTable(String sql) {
 		try(Connection c = DriverManager.getConnection(url)){
 			Statement createTable = c.createStatement();
 	        createTable.execute(sql);
 	        createTable.close();
+	        System.out.println(sql);
 		} catch (Exception e) {
 			// TODO Auto-generated catch blocks
 			e.printStackTrace();
-		}
-			
+		}		
 	}
 	
 	public static ArrayList<String[]> getTasks() {
 		String getAllTasks = "SELECT task FROM items;";
+		System.out.println(getAllTasks);
 		ArrayList<String[]> resultsList = new ArrayList<>();
 		
 		try(Connection c = DriverManager.getConnection(url)){
 			Statement selectAllItems = c.createStatement();
-			ResultSet allItems       = selectAllItems.executeQuery(getAllTasks);
-			    	
+			ResultSet allItems       = selectAllItems.executeQuery(getAllTasks);  	
 			while(allItems.next()) {
 				String resultTasks   = allItems.getString("task");
 				String[] resultArray = new String[] {resultTasks};
 				resultsList.add(resultArray);
 			}
-		}
-		catch(SQLException e) {
-			System.out.println(e.getMessage());
+		} catch(SQLException e) {
+			e.printStackTrace();
 		}
 		return resultsList;
 	}
@@ -76,13 +72,11 @@ public class Database {
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, task);
 			pstmt.executeUpdate();
-		} 
-		catch (SQLException e) {
-			System.out.println(e.getMessage());
-		}
-		
+			System.out.println(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}	
 	}
-
 
 	public static void updateTask(String oldTask, String newTask) {
 		String sql = "UPDATE items SET task=? WHERE task=?";
@@ -91,24 +85,22 @@ public class Database {
 			pstmt.setString(1, oldTask);
 			pstmt.setString(2, newTask);
 			pstmt.executeUpdate();
-		}
-		catch(SQLException e) {
-			System.out.println(e.getMessage());
+			System.out.println(sql);
+		} catch(SQLException e) {
+			e.printStackTrace();
 		}
 		
 	}
 
 	public static void deleteItem(String tempString) {
 		String sql = "DELETE FROM items WHERE task=?";
+		System.out.println(sql);
 		try(Connection c = DriverManager.getConnection(url)){
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, tempString);
 			pstmt.executeUpdate();
-		}
-		catch(SQLException e) {
-			System.out.println(e.getMessage());
-		}
-		
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}	
 	}
-	
 }
