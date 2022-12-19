@@ -1,4 +1,4 @@
-package com.ToDo;
+package net.greatcatlab.ToDo;
 
 import java.io.File;
 import java.sql.Connection;
@@ -10,7 +10,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 public class Database {
-	
+
 	static final String currentUser = System.getProperty("user.name");
 	static final String path = "/home/"+currentUser+"/.local/share/java-todo/"+
 			currentUser+"_todos.db";
@@ -19,13 +19,13 @@ public class Database {
 			+ "     id integer PRIMARY KEY,\n"
 			+ "     user text NOT NULL\n"
 			+ ");";
-			
+
 	String sqlCreateTaskTable = "CREATE TABLE IF NOT EXISTS items (\n"
 			+ "     id integer PRIMARY KEY,\n"
 			+ "     user_id integer NOT NULL,\n"
 			+ "     task text NOT NULL\n"
 			+ ");";
-	
+
 	public Database(){
 		//create new DB if not there
 		File appDirectory = new File(path);
@@ -33,7 +33,7 @@ public class Database {
 		createTable(sqlCreateUserTable);
 		createTable(sqlCreateTaskTable);
 	}
-	
+
 	private static void createTable(String sql) {
 		try(Connection c = DriverManager.getConnection(url)){
 			Statement createTable = c.createStatement();
@@ -43,17 +43,17 @@ public class Database {
 		} catch (Exception e) {
 			// TODO Auto-generated catch blocks
 			e.printStackTrace();
-		}		
+		}
 	}
-	
+
 	public static ArrayList<String[]> getTasks() {
 		String getAllTasks = "SELECT task FROM items;";
 		System.out.println(getAllTasks);
 		ArrayList<String[]> resultsList = new ArrayList<>();
-		
+
 		try(Connection c = DriverManager.getConnection(url)){
 			Statement selectAllItems = c.createStatement();
-			ResultSet allItems       = selectAllItems.executeQuery(getAllTasks);  	
+			ResultSet allItems       = selectAllItems.executeQuery(getAllTasks);
 			while(allItems.next()) {
 				String resultTasks   = allItems.getString("task");
 				String[] resultArray = new String[] {resultTasks};
@@ -75,7 +75,7 @@ public class Database {
 			System.out.println(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}	
+		}
 	}
 
 	public static void updateTask(String oldTask, String newTask) {
@@ -89,7 +89,7 @@ public class Database {
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	public static void deleteItem(String tempString) {
@@ -101,6 +101,6 @@ public class Database {
 			pstmt.executeUpdate();
 		} catch(SQLException e) {
 			e.printStackTrace();
-		}	
+		}
 	}
 }

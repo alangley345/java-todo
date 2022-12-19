@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>net.greatcatlab</groupId>
+    <artifactId>net.net.greatcatlab.ToDo</artifactId>
+    <packaging>jar</packaging>
+    <version>0.1.0</version>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+    
+    <dependencies>
+    
+	    <!-- https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox -->
+		<dependency>
+	    	<groupId>org.apache.pdfbox</groupId>
+	    	<artifactId>pdfbox</artifactId>
+	    	<version>2.0.27</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
+		<dependency>
+    		<groupId>org.xerial</groupId>
+    		<artifactId>sqlite-jdbc</artifactId>
+    		<version>3.39.2.1</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.eclipse.platform/org.eclipse.swt.gtk.linux.x86_64 -->
+		<dependency>
+    		<groupId>org.eclipse.platform</groupId>
+    		<artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
+    		<version>3.122.0</version>
+    		<exclusions>
+    			<exclusion>
+    				<groupId>org.eclipse.platform</groupId>
+    				<artifactId>org.eclipse.swt</artifactId>
+    			</exclusion>
+    		</exclusions>
+		</dependency>	
+		
+	</dependencies>	
+
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>11</source>
+          <target>11</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
