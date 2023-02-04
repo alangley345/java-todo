@@ -34,7 +34,7 @@ public class Database {
 		createTable(sqlCreateTaskTable);
 	}
 
-	private static void createTable(String sql) {
+	private void createTable(String sql) {
 		try(Connection c = DriverManager.getConnection(url)){
 			Statement createTable = c.createStatement();
 	        createTable.execute(sql);
@@ -46,18 +46,22 @@ public class Database {
 		}
 	}
 
-	public static ArrayList<String[]> getTasks() {
-		String getAllTasks = "SELECT task FROM items;";
-		System.out.println(getAllTasks);
+	public ArrayList<String[]> getTasks() {
+		String sql = "SELECT id,task FROM items;";
+		System.out.println(sql);
 		ArrayList<String[]> resultsList = new ArrayList<>();
 
 		try(Connection c = DriverManager.getConnection(url)){
 			Statement selectAllItems = c.createStatement();
-			ResultSet allItems       = selectAllItems.executeQuery(getAllTasks);
+			ResultSet allItems       = selectAllItems.executeQuery(sql);
 			while(allItems.next()) {
-				String resultTasks   = allItems.getString("task");
-				String[] resultArray = new String[] {resultTasks};
+				String id   = allItems.getString("id");
+				String task   = allItems.getString("task");
+				String[] resultArray = new String[] {id, task};
 				resultsList.add(resultArray);
+				
+				System.out.println(id);
+				System.out.println(task);
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
@@ -66,7 +70,7 @@ public class Database {
 	}
 
 
-	public static void insertTask(String task) {
+	public void insertTask(String task) {
 		String sql = "INSERT INTO items(task) VALUES(?)";
 	    try(Connection c = DriverManager.getConnection(url)){
 			PreparedStatement pstmt = c.prepareStatement(sql);
@@ -78,7 +82,7 @@ public class Database {
 		}
 	}
 
-	public static void updateTask(String oldTask, String newTask) {
+	public void updateTask(String oldTask, String newTask) {
 		String sql = "UPDATE items SET task=? WHERE task=?";
 		try(Connection c = DriverManager.getConnection(url)){
 			PreparedStatement pstmt = c.prepareStatement(sql);
@@ -92,7 +96,7 @@ public class Database {
 
 	}
 
-	public static void deleteItem(String tempString) {
+	public void deleteItem(String tempString) {
 		String sql = "DELETE FROM items WHERE task=?";
 		System.out.println(sql);
 		try(Connection c = DriverManager.getConnection(url)){
