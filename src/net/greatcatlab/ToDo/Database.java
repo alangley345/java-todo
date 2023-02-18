@@ -23,7 +23,8 @@ public class Database {
 	String sqlCreateTaskTable = "CREATE TABLE IF NOT EXISTS items (\n"
 			+ "     id integer PRIMARY KEY,\n"
 			+ "     user_id integer NOT NULL,\n"
-			+ "     task text NOT NULL\n"
+			+ "     task text NOT NULL,\n"
+			+ "     current_index int UNIQUE NOT NULL\n"
 			+ ");";
 
 	public Database(){
@@ -46,7 +47,7 @@ public class Database {
 		}
 	}
 
-	public ArrayList<String[]> getTasks() {
+	public ArrayList<String[]> getAllTasks() {
 		String sql = "SELECT id,task FROM items;";
 		System.out.println(sql);
 		ArrayList<String[]> resultsList = new ArrayList<>();
@@ -59,9 +60,7 @@ public class Database {
 				String task   = allItems.getString("task");
 				String[] resultArray = new String[] {id, task};
 				resultsList.add(resultArray);
-				
-				System.out.println(id);
-				System.out.println(task);
+				System.out.println(id + " " + task);
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
@@ -70,7 +69,7 @@ public class Database {
 	}
 
 
-	public void insertTask(String task) {
+	public void addTask(String task) {
 		String sql = "INSERT INTO items(task) VALUES(?)";
 	    try(Connection c = DriverManager.getConnection(url)){
 			PreparedStatement pstmt = c.prepareStatement(sql);
@@ -96,12 +95,12 @@ public class Database {
 
 	}
 
-	public void deleteItem(String tempString) {
-		String sql = "DELETE FROM items WHERE task=?";
+	public void deleteTask(String id) {
+		String sql = "DELETE FROM items WHERE id=?";
 		System.out.println(sql);
 		try(Connection c = DriverManager.getConnection(url)){
 			PreparedStatement pstmt = c.prepareStatement(sql);
-			pstmt.setString(1, tempString);
+			pstmt.setString(1, id);
 			pstmt.executeUpdate();
 		} catch(SQLException e) {
 			e.printStackTrace();
