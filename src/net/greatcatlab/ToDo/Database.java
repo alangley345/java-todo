@@ -58,7 +58,8 @@ public class Database {
 			while(allItems.next()) {
 				String id   = allItems.getString("id");
 				String task   = allItems.getString("task");
-				String[] resultArray = new String[] {id, task};
+				String current_index  = allItems.getString("current_index");
+				String[] resultArray = new String[] {id, task, current_index};
 				resultsList.add(resultArray);
 				System.out.println(id + " " + task);
 			}

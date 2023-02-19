@@ -32,11 +32,10 @@ public class ToDo {
 	Button editButton, deleteButton, taskButton;
 		
 	ToDo(Display display, Composite composite, todoData data){
-		Shell s = composite.getShell();
 		newRow = new Composite(composite,SWT.NONE);
 		newRow.setLayout(new GridLayout(3,false));
 		newRow.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,false,1,1));
-		newRow.setData(data.id);
+		newRow.setData(data);
 				
 		taskButton = new Button(newRow,SWT.LEFT);
 		taskButton.setText(data.task);
@@ -53,10 +52,10 @@ public class ToDo {
 		        int buttonID = messageBox.open();
 		        switch(buttonID) {
 		          case SWT.OK: 
-		        	  new Database().deleteTask(String.valueOf((Integer) newRow.getData()));
+		        	  new Database().deleteTask(String.valueOf(data.id));
 		        	  newRow.dispose();
 		        	  composite.pack();
-		        	  s.layout();
+		        	  composite.getShell().layout();
 		        	  
 		          case SWT.CANCEL:
 		            break;
@@ -74,24 +73,18 @@ public class ToDo {
 				composite.layout();
 			}
 	    });
-			
-	    newRow.addListener(SWT.MouseExit, new Listener(){
-	    	public void handleEvent(Event event) {
-//		   		editLabel.setVisible(false);
-//				deleteButton.setVisible(false);
-//				newRow.layout();
-	    	}		    
-	    });
 
 	}
 	
 	public static class todoData{
 		int id;
 		String task;
+		int current_index;
 		
 		todoData(String[] temp){
 			this.id=Integer.valueOf(temp[0]);
 			this.task=temp[1];
+			this.current_index=Integer.valueOf(temp[2]);
 		}
 	}
 	

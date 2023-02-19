@@ -20,19 +20,24 @@ import org.eclipse.swt.widgets.Text;
 import net.greatcatlab.ToDo.ToDo.todoData;
 
 public class viewToDos {
-	public static final Display display    = new Display();
-	public static final String currentUser = System.getProperty("user.name");
+	public ArrayList<todoData> todoDataList = new ArrayList<todoData>();
 	
-	
-	private static void getAllTasks(Shell shell, Composite composite) {
+	void getAllTasks() {
 		Database db = new Database();
 		ArrayList<String[]> resultsList = db.getAllTasks();
 		for (String[] temp : resultsList) {
-			ToDo todo = new ToDo(display, composite, new todoData(temp));
+			todoDataList.add(new todoData(temp));
 		}
 	}
 	
-	private static void drawAddButton(Composite composite, Shell shell, Display display) {
+	void drawAllTasks(Display display, Composite composite, ArrayList<todoData> list) {
+		for(todoData td: todoDataList) {
+			new ToDo(display, composite, td);
+		}
+	
+	}
+	
+	void drawAddButton(Composite composite, Shell shell, Display display) {
 	//Add item to table using text fields in new shell
 		Button addButton = new Button(composite, SWT.PUSH);
 		addButton.setImage(new Image(display, new ImageData("./resources/plus-icon.svg").scaledTo(32, 32)));
@@ -61,72 +66,11 @@ public class viewToDos {
 					public void handleEvent(Event event){
 						new Database().addTask(addContentText.getText());
 						addShell.close();
-//						list.removeAll();
-//						drawTasks(shell, list);
 				}});
 
 			addShell.open();
 		}});
 }
-
-//private static void drawEditButton(Composite composite, Shell shell, Display display, List list) {
-//	Button editButton = new Button(composite,SWT.PUSH);
-//	editButton.setText("EDIT");
-//	editButton.setSize(composite.getSize().x, 50);
-//	editButton.addListener(SWT.Selection, new Listener()
-//	{
-//		@Override
-//		public void handleEvent(Event event){
-//			String[] taskToEdit = list.getSelection();
-//
-//			if(taskToEdit.length == 1){
-//				//new shell for editing
-//				Shell editShell = new Shell(display, SWT.CLOSE);
-//				editShell.setText("Add New To Do");
-//				editShell.setSize(400, 400);
-//				editShell.setLocation(shell.getLocation());
-//				editShell.setLayout(new GridLayout());
-//				GridData editShellGrid = new GridData(SWT.FILL, SWT.CENTER, true, false);
-//
-//				//Text for addition
-//				Text editContentText = new Text(editShell,SWT.FILL);
-//				editContentText.setSize(400,100);
-//				editContentText.setLocation(editShell.getLocation().x, editShell.getLocation().y-75);
-//				editContentText.setLayoutData(editShellGrid);
-//				editContentText.setText(taskToEdit[0]);
-//
-//				//SQL update statement
-//				Button internalAddButton = new Button(editShell,SWT.PUSH);
-//				internalAddButton.setText("Update Task");
-//				internalAddButton.setSize(20, 10);
-//				internalAddButton.setLocation(editShell.getLocation().x, editShell.getLocation().y-350);
-//				internalAddButton.addListener(SWT.Selection, new Listener()
-//				{
-//					@Override
-//					public void handleEvent(Event event)
-//					{
-//						Database.updateTask(editContentText.getText(), taskToEdit[0]);
-//						editShell.close();
-//						list.removeAll();
-//						drawTasks(shell, list);
-//					}
-//				});
-//				editShell.open();
-//			}
-//
-//		}
-//	});
-//}
-
-//private static void deleteItems(Shell shell, List list){
-//
-//	String[] searchStrings = list.getSelection();
-//	for (String tempString : searchStrings) {
-//		Database.deleteItem(tempString);
-//	}
-//	list.removeAll();
-//	drawTasks(shell, list);
-//}
 
 //private static String chooseSaveLocation() {
 //	Shell saveShell = new Shell(display);
@@ -137,52 +81,12 @@ public class viewToDos {
 //	return name;
 //}
 
-//private static void savePDF() {
-//	ArrayList<String[]> resultsList = Database.getTasks();
-//
-//	try {
-//		PDDocument document = new PDDocument();
-//		PDPage newPage = new PDPage();
-//		document.addPage(newPage);
-//		PDPage tasks = document.getPage(0);
-//		PDPageContentStream contentStream = new PDPageContentStream(document, tasks);
-//		contentStream.setFont(PDType1Font.COURIER, 16);
-//		contentStream.setLeading(1.15f);
-//
-//		//header
-//		contentStream.beginText();
-//		contentStream.newLineAtOffset(200, 750);
-//		contentStream.showText(currentUser + "'s To-Dos");
-//		contentStream.newLineAtOffset(0, -15);
-//		contentStream.newLineAtOffset(0, -15);
-//		contentStream.endText();
-//
-//		//tasks
-//		contentStream.beginText();
-//		contentStream.newLineAtOffset(25, 700);
-//		for(int i = 0; i < resultsList.size(); i++) {
-//			String[] temp = resultsList.get(i);
-//			contentStream.newLineAtOffset(0, -15);
-//			contentStream.showText(i+1 + ". " + temp[0]);
-//		}
-//
-//		contentStream.endText();
-//		contentStream.close();
-//		String fileName = chooseSaveLocation();
-//		document.save(fileName);
-//		document.close();
-//	}
-//	catch (IOException e1) {
-//		// TODO Auto-generated catch block
-//		e1.printStackTrace();s
-//	}
-//}
-
-	private static void drawGUI() {
-		//variables for shell
-		String title        = currentUser + "'s " + "To Dos";
-		int    width        = 400;
-		int    height       = 800;
+	void drawGUI() {
+		final Display display  = new Display();
+		final String currentUser = System.getProperty("user.name");
+		String title = currentUser + "'s " + "To Dos";
+		int	width = 400;
+		int height= 800;
 
 		//shell
 		Shell shell         = new Shell(display);
@@ -225,11 +129,10 @@ public class viewToDos {
 
 		//Add buttons for functions
 		drawAddButton(buttonComposite, shell, display);
-//		drawEditButton(buttonComposite, shell, display, list);
-//		drawDeleteButton(buttonComposite, shell, display, list);
 
 		//Populate the tasks in the list
-		getAllTasks(shell, todoComposite);
+		getAllTasks();
+		drawAllTasks(display, todoComposite, todoDataList);
 	
 		todoComposite.layout();
 		shell.pack();
@@ -242,9 +145,9 @@ public class viewToDos {
 		}
 	
 	}
-	
+
 	public static void main(String[] args) {
-		drawGUI();
+		new viewToDos().drawGUI();
 	}
 }
 
