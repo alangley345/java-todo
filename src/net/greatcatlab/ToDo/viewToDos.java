@@ -9,6 +9,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
@@ -20,11 +21,16 @@ import org.eclipse.swt.widgets.Text;
 import net.greatcatlab.ToDo.ToDo.todoData;
 
 public class viewToDos {
+	int nextIndex;
+	Shell shell;
+	Display display;
+	Composite todoComposite;
 	public ArrayList<todoData> todoDataList = new ArrayList<todoData>();
+	Database db = new Database();
 	
 	void getAllTasks() {
-		Database db = new Database();
 		ArrayList<String[]> resultsList = db.getAllTasks();
+		nextIndex=resultsList.size()+1;
 		for (String[] temp : resultsList) {
 			todoDataList.add(new todoData(temp));
 		}
@@ -64,8 +70,9 @@ public class viewToDos {
 				internalAddButton.setLocation(addShell.getLocation().x, addShell.getLocation().y-350);
 				internalAddButton.addListener(SWT.Selection, new Listener(){
 					public void handleEvent(Event event){
-						new Database().addTask(addContentText.getText());
+						db.addTask(nextIndex, addContentText.getText());
 						addShell.close();
+						redrawTasks();
 				}});
 
 			addShell.open();
@@ -82,14 +89,14 @@ public class viewToDos {
 //}
 
 	void drawGUI() {
-		final Display display  = new Display();
+		display  = new Display();
 		final String currentUser = System.getProperty("user.name");
 		String title = currentUser + "'s " + "To Dos";
 		int	width = 400;
 		int height= 800;
 
 		//shell
-		Shell shell         = new Shell(display);
+		shell = new Shell(display);
 		shell.setText(title);
 		shell.setSize(width,height);
 		shell.setLayout(new GridLayout(1,false));
@@ -119,7 +126,7 @@ public class viewToDos {
 		shell.setMenuBar(menuBar);
     
 		//row for the buttons
-		Composite todoComposite = new Composite(shell, 1);
+		todoComposite = new Composite(shell, 1);
 		todoComposite.setLayout(new GridLayout(1,false));
 		todoComposite.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,1));
 
@@ -130,11 +137,8 @@ public class viewToDos {
 		//Add buttons for functions
 		drawAddButton(buttonComposite, shell, display);
 
-		//Populate the tasks in the list
-		getAllTasks();
-		drawAllTasks(display, todoComposite, todoDataList);
-	
-		todoComposite.layout();
+		populateTasks();
+		
 		shell.pack();
 		shell.open();
 		
@@ -144,6 +148,25 @@ public class viewToDos {
 			}
 		}
 	
+	}
+	
+	void populateTasks() {
+		//Populate the tasks in the list
+		getAllTasks();
+		drawAllTasks(display, todoComposite, todoDataList);
+		todoComposite.layout();
+	}
+	
+	void redrawTasks() {
+		for(Control composite : todoComposite.getChildren()){
+			Composite innerComposite = (Composite) composite;
+			for(Control button : innerComposite.getChildren()){
+				button.dispose();
+			}
+			innerComposite.dispose();
+		}
+		todoDataList.clear();
+		populateTasks();
 	}
 
 	public static void main(String[] args) {
